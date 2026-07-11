@@ -128,4 +128,4 @@ Set your Neovim config directory to `~/.config/nvim` or this repo path.
 
 ## License
 
-MIT
+MIT © [Leenium](LICENSE)
