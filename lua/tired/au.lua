@@ -52,6 +52,20 @@ vim.api.nvim_create_user_command("MasonInstallAll", function()
   require("tired.mason").install_all()
 end, {})
 
+-- install any enabled LSP (and configured formatters/linters) that are missing.
+-- idempotent: once every binary is present this stops running.
+if not vim.g.tired_no_autoinstall then
+  vim.defer_fn(function()
+    local binaries = require("tired.configs.lspconfig").binaries
+    for _, bin in pairs(binaries) do
+      if vim.fn.executable(bin) == 0 then
+        require("tired.mason").install_all()
+        return
+      end
+    end
+  end, 2000)
+end
+
 if config.colorify.enabled then
   require("tired.colorify").run()
 end

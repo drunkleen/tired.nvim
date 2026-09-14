@@ -33,6 +33,32 @@ M.on_init = function(client, _)
   end
 end
 
+-- servers that are allowed to be enabled (auto-installed via mason)
+-- server name -> executable it expects on PATH (matches mason package bins)
+M.binaries = {
+  lua_ls = "lua-language-server",
+  rust_analyzer = "rust-analyzer",
+  gopls = "gopls",
+  html = "vscode-html-language-server",
+  htmx = "htmx-lsp",
+  jinja_lsp = "jinja-lsp",
+  templ = "templ",
+  cssls = "vscode-css-language-server",
+  ts_ls = "typescript-language-server",
+  jsonls = "vscode-json-language-server",
+  yamlls = "yaml-language-server",
+  dockerls = "docker-langserver",
+  docker_compose_language_service = "docker-compose-langserver",
+  pyright = "pyright-langserver",
+  jdtls = "jdtls",
+  clangd = "clangd",
+  hls = "haskell-language-server-wrapper",
+  marksman = "marksman",
+  lemminx = "lemminx",
+  zls = "zls",
+  sqls = "sqls",
+}
+
 M.capabilities = vim.lsp.protocol.make_client_capabilities()
 
 M.capabilities.textDocument.completion.completionItem = {
@@ -78,6 +104,11 @@ M.defaults = function()
   }
 
   local function enable(server, opts)
+    local binary = M.binaries[server]
+    if binary and vim.fn.executable(binary) == 0 then
+      return
+    end
+
     opts = vim.tbl_deep_extend("force", {
       capabilities = M.capabilities,
       on_init = M.on_init,
@@ -93,7 +124,7 @@ M.defaults = function()
     settings = {
       ["rust-analyzer"] = {
         cargo = { allFeatures = true },
-        checkOnSave = { command = "clippy" },
+        check = { command = "clippy" },
       },
     },
   })

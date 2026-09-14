@@ -1,41 +1,41 @@
 local M = {}
-local masonames = require "tired.mason.names"
+local names = require "tired.mason.names"
 local pkgs = require("tiredconfig").mason.pkgs
 local skipped = require("tiredconfig").mason.skip
 
 M.get_pkgs = function()
   local tools = {}
 
-  local native_lsps = vim.tbl_keys(vim.lsp._enabled_configs or {})
-  local lspconfig_lsps = require("lspconfig.util").available_servers()
-  vim.list_extend(tools, lspconfig_lsps)
-  vim.list_extend(tools, native_lsps)
-
-  local conform_exists, conform = pcall(require, "conform")
-
-  if conform_exists then
-    for _, v in ipairs(conform.list_all_formatters()) do
-      local fmts = vim.split(v.name:gsub(",", ""), "%s+")
-      vim.list_extend(tools, fmts)
+  local add = function(name)
+    local pkg = names[name]
+    if pkg and not vim.tbl_contains(pkgs, pkg) and not vim.tbl_contains(skipped, pkg) then
+      table.insert(pkgs, pkg)
     end
   end
 
-  -- nvim-lint
-  local lint_exists, lint = pcall(require, "lint")
+  -- only the servers actually enabled by this config
+  local binaries = require("tired.configs.lspconfig").binaries or {}
+  for server in pairs(binaries) do
+    add(server)
+  end
 
-  if lint_exists then
-    local linters = lint.linters_by_ft
-
-    for _, v in pairs(linters) do
-      vim.list_extend(tools, v)
+  -- only formatters/linters actually configured by this config
+  local conform = require "tired.configs.conform"
+  for _, fmts in pairs(conform.formatters_by_ft or {}) do
+    for _, fmt in ipairs(fmts) do
+      table.insert(tools, fmt)
     end
   end
 
-  -- rm duplicates
-  for _, v in pairs(tools) do
-    if not vim.tbl_contains(pkgs, masonames[v]) and not vim.tbl_contains(skipped, masonames[v]) then
-      table.insert(pkgs, masonames[v])
+  local lint = require "tired.configs.lint"
+  for _, linters in pairs(lint.linters_by_ft or {}) do
+    for _, linter in ipairs(linters) do
+      table.insert(tools, linter)
     end
+  end
+
+  for _, tool in ipairs(tools) do
+    add(tool)
   end
 
   return pkgs
@@ -50,8 +50,6 @@ local function parse_package(package_name)
 end
 
 M.install_all = function()
-  vim.cmd "Mason"
-
   local mr = require "mason-registry"
 
   mr.refresh(function()
