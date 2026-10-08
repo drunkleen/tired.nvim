@@ -49,16 +49,32 @@ local function parse_package(package_name)
   }
 end
 
+local function notify(msg)
+  vim.schedule(function()
+    vim.notify(msg, vim.log.levels.WARN)
+  end)
+end
+
 M.install_all = function()
   local mr = require "mason-registry"
 
   mr.refresh(function()
     for _, tool in ipairs(M.get_pkgs()) do
       local pkg = parse_package(tool)
-      local p = mr.get_package(pkg.name)
+      local ok, p = pcall(mr.get_package, pkg.name)
 
-      if not p:is_installed() then
-        p:install { version = pkg.version }
+      if not ok then
+        notify(("mason: unknown package %q"):format(pkg.name))
+      elseif not p:is_installed() then
+        p:install({ version = pkg.version }, function(success, err)
+          if success then
+            return
+          end
+
+          local reason = type(err) == "table" and (err.stderr or err[1]) or err
+          reason = tostring(reason):gsub("%s+$", "")
+          notify(("mason: failed to install %s (%s)"):format(pkg.name, reason))
+        end)
       end
     end
   end)

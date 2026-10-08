@@ -53,16 +53,34 @@ vim.api.nvim_create_user_command("MasonInstallAll", function()
 end, {})
 
 -- install any enabled LSP (and configured formatters/linters) that are missing.
--- idempotent: once every binary is present this stops running.
+-- only runs when the set of missing binaries changed, so servers that cannot
+-- be built here (e.g. gopls/sqls without a Go toolchain) don't retry forever.
 if not vim.g.tired_no_autoinstall then
   vim.defer_fn(function()
     local binaries = require("tired.configs.lspconfig").binaries
+    local missing = {}
+
     for _, bin in pairs(binaries) do
       if vim.fn.executable(bin) == 0 then
-        require("tired.mason").install_all()
-        return
+        table.insert(missing, bin)
       end
     end
+
+    if #missing == 0 then
+      return
+    end
+
+    table.sort(missing)
+    local key = table.concat(missing, ",")
+    local marker = vim.fn.stdpath "state" .. "/tired_mason_attempted"
+    local previous = vim.fn.filereadable(marker) == 1 and table.concat(vim.fn.readfile(marker), ",") or nil
+
+    if previous == key then
+      return
+    end
+
+    vim.fn.writefile({ key }, marker)
+    pcall(require("tired.mason").install_all)
   end, 2000)
 end
 

@@ -1,6 +1,6 @@
-local lint = require "lint"
+local M = {}
 
-lint.linters_by_ft = {
+M.linters_by_ft = {
   lua = { "luacheck" },
   c = { "cpplint" },
   cpp = { "cpplint" },
@@ -33,15 +33,20 @@ lint.linters_by_ft = {
   dockerfile = { "hadolint" },
 }
 
-local group = vim.api.nvim_create_augroup("TiredLint", { clear = true })
+function M.setup()
+  local lint = require "lint"
+  lint.linters_by_ft = M.linters_by_ft
 
-vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile", "BufWritePost", "InsertLeave" }, {
-  group = group,
-  callback = function()
-    vim.schedule(function()
-      lint.try_lint()
-    end)
-  end,
-})
+  local group = vim.api.nvim_create_augroup("TiredLint", { clear = true })
 
-return lint
+  vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile", "BufWritePost", "InsertLeave" }, {
+    group = group,
+    callback = function()
+      vim.schedule(function()
+        lint.try_lint()
+      end)
+    end,
+  })
+end
+
+return M

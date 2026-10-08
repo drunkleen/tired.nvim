@@ -21,7 +21,6 @@ local parser_list = {
   "html",
   "css",
   "json",
-  "jsonc",
   "yaml",
   "dockerfile",
   "gotmpl",
