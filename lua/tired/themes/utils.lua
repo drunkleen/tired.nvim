@@ -11,12 +11,12 @@ M.filter = function(tb, str)
   end
 
   for _, word in ipairs(tb) do
-    if string.find(word, str) and not vim.tbl_contains(result, word) then
+    if string.find(word, str, 1, true) and not vim.tbl_contains(result, word) then
       table.insert(result, word)
     end
   end
 
-  return #result == 0 and tb or result
+  return result
 end
 
 M.reload_theme = function(name)

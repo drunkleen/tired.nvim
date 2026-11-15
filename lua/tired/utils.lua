@@ -18,15 +18,7 @@ M.list_themes = function()
     default_themes[index] = theme:match "(.+)%..+"
   end
 
-  local filtered = {}
-
-  for _, theme in ipairs(default_themes) do
-    if not theme:find("light") then
-      table.insert(filtered, theme)
-    end
-  end
-
-  return filtered
+  return default_themes
 end
 
 M.replace_word = function(old, new, filepath)

@@ -148,6 +148,7 @@ return {
   {
     "neovim/nvim-lspconfig",
     event = "User FilePost",
+    dependencies = { "mason-org/mason.nvim" },
     config = function()
       require("tired.configs.lspconfig").defaults()
     end,

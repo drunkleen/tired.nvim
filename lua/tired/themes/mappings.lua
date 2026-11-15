@@ -17,8 +17,12 @@ map("i", { "<C-p>", "<Up>" }, nvapi.move_up, { buffer = state.input_buf })
 map("n", { "k", "<Up>" }, nvapi.move_up, { buffer = state.input_buf })
 
 map({ "i", "n" }, { "<cr>" }, function()
-  state.confirmed = true
   local name = state.themes_shown[state.index]
+  if not name then
+    return
+  end
+
+  state.confirmed = true
   package.loaded.tiredvim = nil
   local old_theme = require("tiredvim").base46.theme
 
@@ -70,6 +74,7 @@ autocmd("TextChangedI", {
       utils.reload_theme(state.themes_shown[1])
     end
 
+    api.nvim_buf_clear_namespace(state.buf, state.ns, 0, -1)
     redraw(state.buf, "all")
     state.scrolled = false
     state.textchanged = true
