@@ -45,6 +45,22 @@ Set your Neovim config directory to `~/.config/nvim` or this repo path.
 
 ---
 
+## Enable WakaTime
+
+WakaTime time tracking is disabled by default. To enable it, open `lua/plugins/init.lua` in this configuration and change the WakaTime plugin entry to:
+
+```lua
+{
+  "wakatime/vim-wakatime",
+  enabled = true,
+  event = "VeryLazy",
+},
+```
+
+Restart Neovim and run `:Lazy sync` to install the plugin. Restart again, open a file, and enter your WakaTime API key when prompted. To disable tracking again, set `enabled = false` and restart Neovim.
+
+---
+
 ## Keybindings
 
 ### Editing
