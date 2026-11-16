@@ -32,7 +32,7 @@ return {
   -- time tracking
   {
     "wakatime/vim-wakatime",
-    enabled = false,
+    enabled = true,
     event = "VeryLazy",
   },
 }
